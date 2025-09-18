@@ -108,7 +108,6 @@ ipcMain.handle('timer-finished', () => {
   killChromeProcesses();
   setTimeout(() => {
     lockScreen();
-    switchToSetupMode();
   }, 1000);
 });
 

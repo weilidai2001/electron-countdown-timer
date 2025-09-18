@@ -115,6 +115,7 @@ class CountdownTimer {
 
     async timerFinished() {
         this.isRunning = false;
+        this.isPaused = false;
         clearInterval(this.intervalId);
 
         await ipcRenderer.invoke('timer-finished');
@@ -125,6 +126,8 @@ class CountdownTimer {
         this.stopBtn.disabled = true;
         this.startBtn.textContent = 'Start';
         this.pauseBtn.textContent = '⏸';
+
+        await this.switchToSetupMode();
     }
 
     async switchToTimerMode() {
