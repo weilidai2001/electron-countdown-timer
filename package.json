@@ -11,17 +11,48 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
     "clean": "rimraf dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "pack": "npm run build && electron-builder --dir"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A countdown timer app that locks screen and kills Chrome when timer finishes",
+  "build": {
+    "appId": "com.timer.countdown",
+    "productName": "Countdown Timer",
+    "directories": {
+      "output": "dist-app"
+    },
+    "files": [
+      "dist/**/*",
+      "*.html",
+      "*.css",
+      "renderer.js",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    }
+  },
   "devDependencies": {
     "@types/node": "^24.5.2",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
     "electron": "^38.1.2",
+    "electron-builder": "^26.0.12",
     "eslint": "^9.35.0",
     "prettier": "^3.6.2",
     "rimraf": "^5.0.10",
