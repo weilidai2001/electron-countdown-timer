@@ -121,6 +121,9 @@ class CountdownTimer {
             this.runCountdown();
             this.pauseBtn.textContent = '⏸';
         }
+
+        // Update timer window with new pause state
+        this.updateDisplay();
     }
 
     runCountdown() {
