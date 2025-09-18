@@ -12,16 +12,7 @@ class CountdownTimer {
         this.initializeElements();
         this.attachEventListeners();
         this.updateDisplay();
-
-        // Listen for pause toggle from timer window
-        ipcRenderer.on('toggle-pause-from-timer', () => {
-            this.togglePause();
-        });
-
-        // Listen for stop from timer window
-        ipcRenderer.on('stop-timer-from-timer', () => {
-            this.stopTimer();
-        });
+        this.setupIpcListeners();
     }
 
     initializeElements() {
@@ -49,6 +40,16 @@ class CountdownTimer {
         this.startBtn.addEventListener('click', () => this.startTimer());
         this.stopBtn.addEventListener('click', () => this.stopTimer());
         this.pauseBtn.addEventListener('click', () => this.togglePause());
+    }
+
+    setupIpcListeners() {
+        ipcRenderer.on('toggle-pause-from-timer', () => {
+            this.togglePause();
+        });
+
+        ipcRenderer.on('stop-timer-from-timer', () => {
+            this.stopTimer();
+        });
     }
 
     adjustTime(seconds) {
@@ -191,6 +192,7 @@ class CountdownTimer {
     }
 }
 
+// Initialize the timer when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new CountdownTimer();
 });
