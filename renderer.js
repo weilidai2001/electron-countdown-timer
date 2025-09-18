@@ -2,7 +2,8 @@ const { ipcRenderer } = require('electron');
 
 class CountdownTimer {
     constructor() {
-        this.timeLeft = 12 * 60; // 12 minutes in seconds
+        this.DEFAULT_TIME = 12 * 60; // 12 minutes in seconds
+        this.timeLeft = this.DEFAULT_TIME;
         this.isRunning = false;
         this.isPaused = false;
         this.intervalId = null;
@@ -96,6 +97,10 @@ class CountdownTimer {
         this.isPaused = false;
         clearInterval(this.intervalId);
 
+        // Reset timer to default time
+        this.timeLeft = this.DEFAULT_TIME;
+        this.updateDisplay();
+
         this.startBtn.disabled = false;
         this.stopBtn.disabled = true;
         this.startBtn.textContent = 'Start';
@@ -138,7 +143,7 @@ class CountdownTimer {
 
         await ipcRenderer.invoke('timer-finished');
 
-        this.timeLeft = 12 * 60;
+        this.timeLeft = this.DEFAULT_TIME;
         this.updateDisplay();
         this.startBtn.disabled = false;
         this.stopBtn.disabled = true;

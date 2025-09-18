@@ -87,7 +87,8 @@
     <script>
         const { ipcRenderer } = require('electron');
 
-        let timeLeft = 12 * 60;
+        const DEFAULT_TIME = 12 * 60; // 12 minutes in seconds
+        let timeLeft = DEFAULT_TIME;
         let isPaused = false;
 
         const timerText = document.getElementById('timer-text');
