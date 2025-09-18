@@ -55,9 +55,9 @@ function switchToTimerMode() {
 
   // Create a new frameless window for timer mode
   const timerWindow = new BrowserWindow({
-    width: 110,
+    width: 85,
     height: 25,
-    x: width - 120,
+    x: width - 95,
     y: 10,
     frame: false,
     resizable: false,
