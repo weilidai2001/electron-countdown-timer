@@ -16,6 +16,11 @@ class CountdownTimer {
         ipcRenderer.on('toggle-pause-from-timer', () => {
             this.togglePause();
         });
+
+        // Listen for stop from timer window
+        ipcRenderer.on('stop-timer-from-timer', () => {
+            this.stopTimer();
+        });
     }
 
     initializeElements() {

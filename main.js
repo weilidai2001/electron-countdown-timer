@@ -55,9 +55,9 @@ function switchToTimerMode() {
 
   // Create a new frameless window for timer mode
   const timerWindow = new BrowserWindow({
-    width: 120,
+    width: 140,
     height: 35,
-    x: width - 130,
+    x: width - 150,
     y: 10,
     frame: false,
     resizable: false,
@@ -151,6 +151,13 @@ ipcMain.handle('toggle-pause', () => {
   // Forward pause toggle to main window
   if (mainWindow) {
     mainWindow.webContents.send('toggle-pause-from-timer');
+  }
+});
+
+ipcMain.handle('stop-timer', () => {
+  // Forward stop to main window
+  if (mainWindow) {
+    mainWindow.webContents.send('stop-timer-from-timer');
   }
 });
 
