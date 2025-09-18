@@ -1,10 +1,16 @@
 {
   "name": "electron-countdown-timer",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "dist/main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron . --inspect=5858",
+    "build": "tsc",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron . --inspect=5858",
+    "watch": "tsc --watch",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "clean": "rimraf dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,6 +18,13 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "electron": "^38.1.2"
+    "@types/node": "^24.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.0",
+    "electron": "^38.1.2",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "rimraf": "^5.0.10",
+    "typescript": "^5.9.2"
   }
 }

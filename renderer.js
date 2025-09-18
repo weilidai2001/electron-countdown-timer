@@ -69,11 +69,16 @@ class CountdownTimer {
         this.timerText.textContent = timeString;
         this.miniTimerText.textContent = timeString;
 
-        // Update timer window if in timer mode
+        // Update timer window if in timer mode (non-blocking)
         if (this.isTimerMode) {
-            ipcRenderer.invoke('update-timer-display', {
-                timeLeft: this.timeLeft,
-                isPaused: this.isPaused
+            // Use setImmediate to avoid blocking the countdown
+            setImmediate(() => {
+                ipcRenderer.invoke('update-timer-display', {
+                    timeLeft: this.timeLeft,
+                    isPaused: this.isPaused
+                }).catch(error => {
+                    console.error('Failed to update timer window:', error);
+                });
             });
         }
     }
@@ -118,6 +123,7 @@ class CountdownTimer {
             clearInterval(this.intervalId);
             this.pauseBtn.textContent = '▶️';
         } else {
+            // When resuming, recalculate target time based on current remaining time
             this.runCountdown();
             this.pauseBtn.textContent = '⏸';
         }
@@ -127,16 +133,28 @@ class CountdownTimer {
     }
 
     runCountdown() {
+        // Store start time for more accurate timing
+        this.startTime = Date.now();
+        this.targetTime = this.startTime + (this.timeLeft * 1000);
+
         this.intervalId = setInterval(() => {
             if (this.isPaused) return;
 
-            this.timeLeft--;
-            this.updateDisplay();
+            // Calculate remaining time based on actual elapsed time
+            const now = Date.now();
+            const remainingMs = Math.max(0, this.targetTime - now);
+            const newTimeLeft = Math.ceil(remainingMs / 1000);
 
-            if (this.timeLeft <= 0) {
-                this.timerFinished();
+            // Only update if time actually changed (prevents UI flickering)
+            if (newTimeLeft !== this.timeLeft) {
+                this.timeLeft = newTimeLeft;
+                this.updateDisplay();
+
+                if (this.timeLeft <= 0) {
+                    this.timerFinished();
+                }
             }
-        }, 1000);
+        }, 100); // Check more frequently for smoother updates
     }
 
     async timerFinished() {
