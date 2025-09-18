@@ -11,6 +11,11 @@ class CountdownTimer {
         this.initializeElements();
         this.attachEventListeners();
         this.updateDisplay();
+
+        // Listen for pause toggle from timer window
+        ipcRenderer.on('toggle-pause-from-timer', () => {
+            this.togglePause();
+        });
     }
 
     initializeElements() {
@@ -57,6 +62,14 @@ class CountdownTimer {
         const timeString = this.formatTime(this.timeLeft);
         this.timerText.textContent = timeString;
         this.miniTimerText.textContent = timeString;
+
+        // Update timer window if in timer mode
+        if (this.isTimerMode) {
+            ipcRenderer.invoke('update-timer-display', {
+                timeLeft: this.timeLeft,
+                isPaused: this.isPaused
+            });
+        }
     }
 
     async startTimer() {

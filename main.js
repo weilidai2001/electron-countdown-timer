@@ -53,13 +53,42 @@ function switchToTimerMode() {
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width } = primaryDisplay.workAreaSize;
 
-  mainWindow.setSize(200, 50);
-  mainWindow.setPosition(width - 210, 10);
-  mainWindow.setAlwaysOnTop(true, 'screen-saver');
+  // Create a new frameless window for timer mode
+  const timerWindow = new BrowserWindow({
+    width: 120,
+    height: 35,
+    x: width - 130,
+    y: 10,
+    frame: false,
+    resizable: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    },
+    transparent: true,
+    hasShadow: false
+  });
+
+  // Hide the main window and show timer window
+  mainWindow.hide();
+  timerWindow.loadFile('timer.html');
+  timerWindow.setAlwaysOnTop(true, 'screen-saver');
 
   if (process.platform === 'darwin') {
-    mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    timerWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   }
+
+  // Store reference to timer window
+  global.timerWindow = timerWindow;
+
+  timerWindow.on('closed', () => {
+    global.timerWindow = null;
+  });
 }
 
 function switchToSetupMode() {
@@ -67,6 +96,13 @@ function switchToSetupMode() {
 
   isTimerMode = false;
 
+  // Close timer window and show main window
+  if (global.timerWindow) {
+    global.timerWindow.close();
+    global.timerWindow = null;
+  }
+
+  mainWindow.show();
   mainWindow.setAlwaysOnTop(false);
   mainWindow.setSize(320, 300);
   centerWindow();
@@ -109,6 +145,20 @@ ipcMain.handle('timer-finished', () => {
   setTimeout(() => {
     lockScreen();
   }, 1000);
+});
+
+ipcMain.handle('toggle-pause', () => {
+  // Forward pause toggle to main window
+  if (mainWindow) {
+    mainWindow.webContents.send('toggle-pause-from-timer');
+  }
+});
+
+ipcMain.handle('update-timer-display', (event, data) => {
+  // Forward timer updates to timer window
+  if (global.timerWindow) {
+    global.timerWindow.webContents.send('timer-update', data);
+  }
 });
 
 app.whenReady().then(createWindow);
