@@ -105,13 +105,14 @@ npm run format      # Format code with Prettier
 
 ```
 ├── src/
-│   ├── main.ts           # Main Electron process
-│   ├── renderer.ts       # Main window renderer process
-│   ├── timer-window.ts   # Timer window renderer process
+│   ├── main.ts           # Main Electron process (TypeScript)
 │   └── types.ts          # TypeScript type definitions
-├── dist/                 # Compiled JavaScript output
+├── dist/
+│   ├── main.js           # Compiled main process
+│   └── types.js          # Compiled type definitions
+├── renderer.js           # Main window renderer (optimized JavaScript)
 ├── index.html           # Main window HTML
-├── timer.html           # Timer window HTML
+├── timer.html           # Timer window HTML (with inline script)
 ├── styles.css           # Application styles
 └── tsconfig.json        # TypeScript configuration
 ```
