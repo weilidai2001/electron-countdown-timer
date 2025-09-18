@@ -95,6 +95,7 @@ class CountdownTimer {
         this.startBtn.textContent = 'Running';
 
         await this.switchToTimerMode();
+        this.updateDisplay();
         this.runCountdown();
     }
 
