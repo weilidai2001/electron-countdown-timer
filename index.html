@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <div id="setup-mode" class="mode">
+            <div class="timer-display">
+                <span id="timer-text">12:00</span>
+            </div>
+
+            <div class="time-controls">
+                <button class="time-btn" id="minus-1min">-1min</button>
+                <button class="time-btn" id="minus-10sec">-10sec</button>
+                <button class="time-btn" id="plus-10sec">+10sec</button>
+                <button class="time-btn" id="plus-1min">+1min</button>
+            </div>
+
+            <div class="timer-controls">
+                <button class="control-btn primary" id="start-btn">Start</button>
+                <button class="control-btn" id="stop-btn" disabled>Stop</button>
+            </div>
+        </div>
+
+        <div id="timer-mode" class="mode hidden">
+            <div class="mini-timer-display">
+                <span id="mini-timer-text">12:00</span>
+                <button class="mini-control-btn" id="pause-btn">⏸</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

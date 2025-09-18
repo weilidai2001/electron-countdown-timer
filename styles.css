@@ -1,0 +1,168 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a1a;
+    color: white;
+    user-select: none;
+    overflow: hidden;
+}
+
+#app {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mode {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.timer-display {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#timer-text {
+    font-size: 48px;
+    font-weight: 300;
+    color: #00ff88;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+.time-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.time-btn {
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    min-width: 60px;
+}
+
+.time-btn:hover {
+    background: #444;
+    border-color: #666;
+}
+
+.time-btn:active {
+    background: #222;
+    transform: scale(0.95);
+}
+
+.timer-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.control-btn {
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 80px;
+}
+
+.control-btn.primary {
+    background: #007aff;
+    border-color: #007aff;
+}
+
+.control-btn.primary:hover {
+    background: #0056cc;
+    border-color: #0056cc;
+}
+
+.control-btn:hover {
+    background: #444;
+    border-color: #666;
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+.control-btn:disabled {
+    background: #222;
+    border-color: #333;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.control-btn:disabled:hover {
+    background: #222;
+    border-color: #333;
+}
+
+.mini-timer-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 6px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#mini-timer-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #00ff88;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    min-width: 50px;
+}
+
+.mini-control-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+    width: 24px;
+    height: 24px;
+}
+
+.mini-control-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.mini-control-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+}
