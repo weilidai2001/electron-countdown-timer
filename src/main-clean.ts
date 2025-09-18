@@ -1,5 +1,7 @@
 import { ApplicationController } from './application-controller';
 
+// Clean Main Entry Point - Following Single Responsibility Principle
+// Only responsible for application bootstrap
 class Main {
   private readonly applicationController: ApplicationController;
 
@@ -17,6 +19,7 @@ class Main {
   }
 }
 
+// Bootstrap the application
 const main = new Main();
 main.start().catch((error) => {
   console.error('Unhandled error during application startup:', error);
