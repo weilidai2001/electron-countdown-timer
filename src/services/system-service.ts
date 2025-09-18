@@ -4,128 +4,128 @@ import { ISystemService, ILogger, SystemError } from '../interfaces';
 
 const execAsync = promisify(exec);
 
-// Abstract System Service - Strategy Pattern
-export abstract class SystemService implements ISystemService {
-  constructor(protected readonly logger: ILogger) {}
+type ExecOptions = {
+  startMessage: string;
+  successMessage: string;
+  failureMessage: string;
+  ignoredExitCodes?: number[];
+  ignoredMessage?: string;
+};
 
-  abstract killChromeProcesses(): Promise<void>;
-  abstract lockScreen(): Promise<void>;
-}
+const exitCodeOf = (error: unknown): number | undefined => {
+  const code = (error as { code?: unknown })?.code;
+  return typeof code === 'number' ? code : undefined;
+};
 
-// macOS-specific implementation
-export class MacOSSystemService extends SystemService {
-  public async killChromeProcesses(): Promise<void> {
-    try {
-      this.logger.debug('Killing Chrome processes on macOS');
+const execWithLogging = async (
+  command: string,
+  logger: ILogger,
+  { startMessage, successMessage, failureMessage, ignoredExitCodes = [], ignoredMessage }: ExecOptions
+): Promise<void> => {
+  logger.debug(startMessage);
 
-      await execAsync('pkill -f "Google Chrome"');
-      this.logger.info('Chrome processes killed successfully');
+  try {
+    await execAsync(command);
+    logger.info(successMessage);
+  } catch (error) {
+    const exitCode = exitCodeOf(error);
 
-    } catch (error: any) {
-      // Exit code 1 means no processes found, which is acceptable
-      if (error.code !== 1) {
-        this.logger.error('Failed to kill Chrome processes', error);
-        throw new SystemError('Failed to kill Chrome processes', { error });
-      }
-      this.logger.debug('No Chrome processes found to kill');
+    if (exitCode !== undefined && ignoredExitCodes.includes(exitCode) && ignoredMessage) {
+      logger.debug(ignoredMessage);
+      return;
     }
+
+    logger.error(failureMessage, error as Error);
+    throw new SystemError(failureMessage, { error });
   }
+};
 
-  public async lockScreen(): Promise<void> {
+const lockLinux = async (logger: ILogger): Promise<void> => {
+  logger.debug('Locking screen on Linux');
+
+  const fallbacks = [
+    'gnome-screensaver-command -l',
+    'xdg-screensaver lock',
+    'loginctl lock-session',
+  ];
+
+  let lastError: unknown;
+
+  for (const command of fallbacks) {
+    logger.debug(`Trying lock command: ${command}`);
+
     try {
-      this.logger.debug('Locking screen on macOS');
-
-      await execAsync('pmset displaysleepnow');
-      this.logger.info('Screen locked successfully');
-
+      await execAsync(command);
+      logger.info('Screen locked successfully');
+      return;
     } catch (error) {
-      this.logger.error('Failed to lock screen', error as Error);
-      throw new SystemError('Failed to lock screen', { error });
-    }
-  }
-}
-
-// Windows implementation (placeholder for future support)
-export class WindowsSystemService extends SystemService {
-  public async killChromeProcesses(): Promise<void> {
-    try {
-      this.logger.debug('Killing Chrome processes on Windows');
-
-      await execAsync('taskkill /f /im chrome.exe');
-      this.logger.info('Chrome processes killed successfully');
-
-    } catch (error) {
-      this.logger.error('Failed to kill Chrome processes', error as Error);
-      throw new SystemError('Failed to kill Chrome processes', { error });
+      lastError = error;
+      logger.debug(`Command failed, moving to next fallback: ${command}`);
     }
   }
 
-  public async lockScreen(): Promise<void> {
-    try {
-      this.logger.debug('Locking screen on Windows');
+  logger.error('Failed to lock screen', lastError as Error);
+  throw new SystemError('Failed to lock screen', { error: lastError });
+};
 
-      await execAsync('rundll32.exe user32.dll,LockWorkStation');
-      this.logger.info('Screen locked successfully');
+const macOSService = (logger: ILogger): ISystemService => ({
+  killChromeProcesses: () =>
+    execWithLogging('pkill -f "Google Chrome"', logger, {
+      startMessage: 'Killing Chrome processes on macOS',
+      successMessage: 'Chrome processes killed successfully',
+      failureMessage: 'Failed to kill Chrome processes',
+      ignoredExitCodes: [1],
+      ignoredMessage: 'No Chrome processes found to kill',
+    }),
+  lockScreen: () =>
+    execWithLogging('pmset displaysleepnow', logger, {
+      startMessage: 'Locking screen on macOS',
+      successMessage: 'Screen locked successfully',
+      failureMessage: 'Failed to lock screen',
+    }),
+});
 
-    } catch (error) {
-      this.logger.error('Failed to lock screen', error as Error);
-      throw new SystemError('Failed to lock screen', { error });
-    }
+const windowsService = (logger: ILogger): ISystemService => ({
+  killChromeProcesses: () =>
+    execWithLogging('taskkill /f /im chrome.exe', logger, {
+      startMessage: 'Killing Chrome processes on Windows',
+      successMessage: 'Chrome processes killed successfully',
+      failureMessage: 'Failed to kill Chrome processes',
+    }),
+  lockScreen: () =>
+    execWithLogging('rundll32.exe user32.dll,LockWorkStation', logger, {
+      startMessage: 'Locking screen on Windows',
+      successMessage: 'Screen locked successfully',
+      failureMessage: 'Failed to lock screen',
+    }),
+});
+
+const linuxService = (logger: ILogger): ISystemService => ({
+  killChromeProcesses: () =>
+    execWithLogging('pkill -f chrome', logger, {
+      startMessage: 'Killing Chrome processes on Linux',
+      successMessage: 'Chrome processes killed successfully',
+      failureMessage: 'Failed to kill Chrome processes',
+    }),
+  lockScreen: () => lockLinux(logger),
+});
+
+const builders: Partial<Record<NodeJS.Platform, (logger: ILogger) => ISystemService>> = {
+  darwin: macOSService,
+  win32: windowsService,
+  linux: linuxService,
+};
+
+export const createSystemService = (
+  platform: NodeJS.Platform,
+  logger: ILogger
+): ISystemService => {
+  const build = builders[platform];
+
+  if (!build) {
+    logger.warn(`Unsupported platform: ${platform}, using macOS service as fallback`);
+    return macOSService(logger);
   }
-}
 
-// Linux implementation (placeholder for future support)
-export class LinuxSystemService extends SystemService {
-  public async killChromeProcesses(): Promise<void> {
-    try {
-      this.logger.debug('Killing Chrome processes on Linux');
-
-      await execAsync('pkill -f chrome');
-      this.logger.info('Chrome processes killed successfully');
-
-    } catch (error) {
-      this.logger.error('Failed to kill Chrome processes', error as Error);
-      throw new SystemError('Failed to kill Chrome processes', { error });
-    }
-  }
-
-  public async lockScreen(): Promise<void> {
-    try {
-      this.logger.debug('Locking screen on Linux');
-
-      // Try common screen lockers
-      try {
-        await execAsync('gnome-screensaver-command -l');
-      } catch {
-        try {
-          await execAsync('xdg-screensaver lock');
-        } catch {
-          await execAsync('loginctl lock-session');
-        }
-      }
-
-      this.logger.info('Screen locked successfully');
-
-    } catch (error) {
-      this.logger.error('Failed to lock screen', error as Error);
-      throw new SystemError('Failed to lock screen', { error });
-    }
-  }
-}
-
-// Factory Pattern - Creates appropriate system service based on platform
-export class SystemServiceFactory {
-  public static create(platform: string, logger: ILogger): ISystemService {
-    switch (platform) {
-      case 'darwin':
-        return new MacOSSystemService(logger);
-      case 'win32':
-        return new WindowsSystemService(logger);
-      case 'linux':
-        return new LinuxSystemService(logger);
-      default:
-        logger.warn(`Unsupported platform: ${platform}, using macOS service as fallback`);
-        return new MacOSSystemService(logger);
-    }
-  }
-}
+  return build(logger);
+};

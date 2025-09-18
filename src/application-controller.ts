@@ -8,7 +8,7 @@ import {
   ICommandHandler,
 } from './interfaces';
 import { WindowManager } from './managers/window-manager';
-import { SystemServiceFactory } from './services/system-service';
+import { createSystemService } from './services/system-service';
 import { IPCCommandHandler } from './commands/ipc-handler';
 import { Logger } from './utils/logger';
 import { ConfigurationManager } from './utils/configuration';
@@ -27,7 +27,7 @@ export class ApplicationController implements IApplicationLifecycle {
     this.logger = Logger.getInstance();
     this.config = ConfigurationManager.getInstance();
     this.windowManager = new WindowManager(this.logger, this.config);
-    this.systemService = SystemServiceFactory.create(process.platform, this.logger);
+    this.systemService = createSystemService(process.platform, this.logger);
     this.ipcHandler = new IPCCommandHandler(
       this.logger,
       this.windowManager,
